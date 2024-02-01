@@ -98,7 +98,7 @@ def main():
     st.write("Welcome to the Todo List App! Here you can add, delete and update tasks.")
     st.write("You can also mark tasks as done by clicking the checkbox.")
     st.write("You can also update the state and category of the task by selecting the new state and category from the dropdown.")   
-    st.write("Created by: Freya Yu, UW ID: 2372732, Email: yeyfreya@uw.edu]")
+    st.write("Created by: Freya Yu, UW ID: 2372732, Email: yeyfreya@uw.edu")
 
     # Input form for new task
     with st.form(key='task_form'):
