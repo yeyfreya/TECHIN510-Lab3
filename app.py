@@ -88,7 +88,6 @@ def toggle_is_done(is_done, row):
         (is_done, row[0]),
     )
 
-
 # Function to delete a task
 def delete_task(task_id):
     cur.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
@@ -114,9 +113,29 @@ def main():
         if submit_button:
             insert_task(name, description, is_done, state, created_by, category)
 
-    # Display tasks
+    # Search and filter options
+    search_query = st.text_input("Search tasks", "")
+    filter_state = st.selectbox("Filter by State", ["", "planned", "in-progress", "done"], index=0)
+    filter_category = st.selectbox("Filter by Category", ["", "school", "work", "personal"], index=0)
+    
+    # Constructing the query dynamically based on filters
+    conditions = ["(name LIKE ? OR description LIKE ?)"]
+    params = [f"%{search_query}%", f"%{search_query}%"]
+    
+    if filter_state:
+        conditions.append("state = ?")
+        params.append(filter_state)
+        
+    if filter_category:
+        conditions.append("category = ?")
+        params.append(filter_category)
+        
+    query = "SELECT * FROM tasks WHERE " + " AND ".join(conditions)
+
+    
     data = cur.execute("SELECT * FROM tasks").fetchall()
 
+    # Display tasks
     cols = st.columns([1, 1, 1, 1, 1, 1, 1, 1])  # Adjust column widths as needed
     cols[0].write("Done?")
     cols[1].write("Name")
@@ -130,15 +149,18 @@ def main():
 
     for row in data:
         cols = st.columns([1, 1, 1, 1, 1, 1, 1, 1])  # Adjust column widths as needed
-        cols[0].checkbox('', row[3], label_visibility='hidden', key=f'done_{row[0]}', on_change=toggle_is_done, args=(not row[3], row))
+        
+        is_done_key = f'done_{row[0]}'
+        delete_key = f'delete_{row[0]}'
+        
+        cols[0].checkbox('', row[3], label_visibility='hidden', key=is_done_key, on_change=toggle_is_done, args=(not row[3], row))
         cols[1].write(row[1])
         cols[2].write(row[2])
         cols[3].write(row[4])  # State
         cols[4].write(row[7])  # Category
-        # Format the 'created_at' datetime for better readability
-        cols[5].write(row[5].strftime("%Y-%m-%d %H:%M:%S") if isinstance(row[5], datetime.datetime) else row[5])
+        cols[5].write(row[5].strftime("%Y-%m-%d %H:%M:%S") if isinstance(row[5], datetime.datetime) else row[5])  # Created At
         cols[6].write(row[6])  # Created By
-        if cols[7].button("Delete", key=f'delete_{row[0]}'):
+        if cols[7].button("Delete", key=delete_key):
             delete_task(row[0])
             st.experimental_rerun()
 
