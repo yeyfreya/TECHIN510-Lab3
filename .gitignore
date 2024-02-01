@@ -1,2 +1,6 @@
 *.pyc
 venv
+
+*.sqlite
+*.sqlite3
+*.db
